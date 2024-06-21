@@ -142,69 +142,7 @@ bot.onText(/\/addjadwal (.+)/, (msg, match) => {
     scheduleJob(newSchedule);
 });
 
-bot.on('message', (msg) => {
-    if (msg.photo || msg.video || msg.animation || msg.audio || msg.voice || msg.document || msg.sticker) {
-        const chatId = msg.chat.id;
-        const caption = msg.caption || '';
-
-        if (caption.startsWith('/addjadwal')) {
-            const parts = caption.split('|');
-            if (parts.length !== 3) {
-                bot.sendMessage(chatId, `❌ Format caption tidak valid. Gunakan /addjadwal <pesan/caption> | <waktu> | <target>\n\n format waktu : [ tahun-bulan-tanggal jam-menit-detik ]`);
-                return;
-            }
-
-            const message = parts[0].replace('/addjadwal', '').trim();
-            const waktuStr = parts[1].trim();
-            const target = parts[2].trim();
-            const waktu = moment.tz(waktuStr, "YYYY-MM-DD HH:mm:ss", "Asia/Jakarta");
-
-            if (!waktu.isValid() || waktu.isBefore(moment())) {
-                bot.sendMessage(chatId, `❌ Format waktu tidak valid atau waktu sudah lewat. Gunakan format seperti 2024-06-17 14:45:00 dan waktu harus di masa depan ya.`);
-                return;
-            }
-
-            let newSchedule = {
-                message: message,
-                time: waktu.toDate(),
-                target: target,
-                type: '',
-                fileId: '',
-                sent: false
-            };
-
-            if (msg.photo) {
-                newSchedule.type = 'photo';
-                newSchedule.fileId = msg.photo[msg.photo.length - 1].file_id;
-            } else if (msg.video) {
-                newSchedule.type = 'video';
-                newSchedule.fileId = msg.video.file_id;
-            } else if (msg.animation) {
-                newSchedule.type = 'animation';
-                newSchedule.fileId = msg.animation.file_id;
-            } else if (msg.audio) {
-                newSchedule.type = 'audio';
-                newSchedule.fileId = msg.audio.file_id;
-            } else if (msg.voice) {
-                newSchedule.type = 'voice';
-                newSchedule.fileId = msg.voice.file_id;
-            } else if (msg.document) {
-                newSchedule.type = 'document';
-                newSchedule.fileId = msg.document.file_id;
-            } else if (msg.sticker) {
-                newSchedule.type = 'sticker';
-                newSchedule.fileId = msg.sticker.file_id;
-                newSchedule.message = '';
-            }
-
-            scheduledJobs.push(newSchedule);
-            saveScheduledJobs();
-
-            bot.sendMessage(chatId, `✅ Jadwal untuk ${newSchedule.type} telah diatur dan akan dikirim pada pukul ${waktu.format('DD/MM/YYYY, HH:mm:ss')} WIB (Waktu Indonesia Barat) ke ${target}`);
-            scheduleJob(newSchedule);
-        }
-    }
-});
+// Menghapus duplikasi bot.on('message') dengan membuat kondisi untuk format /addjadwal dalam onText
 
 bot.onText(/\/hapusjadwal (\d+)/, (msg, match) => {
     const chatId = msg.chat.id;
@@ -260,6 +198,6 @@ bot.on('callback_query', (query) => {
     console.log(colors.green(`[Callback Query]:`), colors.white(query.data));
 });
 
-// Other event listeners (like bot.onText) can also be modified similarly
+// Pastikan hanya ada satu bot.on('message') untuk menangani semua jenis pesan termasuk media
 
 console.log(colors.yellow('[Bot Started]'), colors.green(`[${moment().tz('Asia/Jakarta').format('DD/MM/YYYY, HH:mm:ss')} WIB]`));
